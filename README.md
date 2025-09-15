@@ -1,3 +1,73 @@
+# Prospection Agent GEM
+
+Ce projet est un dashboard moderne pour la gestion de campagnes de prospection, l’envoi de messages, et le suivi des conversations. Il propose une expérience UX/UI avancée : transitions animées, micro-interactions, avatars, statistiques, recherche en temps réel, et intégration API n8n.
+
+## Fonctionnalités principales
+- Gestion des campagnes d’envoi de messages
+- Recherche de prospects intelligente (API n8n)
+- Inbox pour suivre et répondre aux conversations
+- Statistiques visuelles (chart.js)
+- Avatars générés automatiquement
+- Micro-interactions et animations (framer-motion, Tailwind)
+- Mode sombre avec toggle
+- Loader/skeleton pour les listes
+
+## Technologies utilisées
+- Next.js 15 (App Router)
+- React
+- Jotai (state management)
+- Tailwind CSS
+- framer-motion
+- chart.js, react-chartjs-2
+- Lucide-react (icônes)
+- sonner (notifications)
+- n8n (API externe)
+
+## Installation
+
+1. **Cloner le projet**
+	```bash
+	git clone <url-du-repo>
+	cd prospection_agent_gem
+	```
+
+2. **Installer les dépendances**
+	```bash
+	npm install
+	```
+
+3. **Lancer le serveur de développement**
+	```bash
+	npm run dev
+	```
+
+4. **Accéder à l’application**
+	Ouvre [http://localhost:3000](http://localhost:3000) dans ton navigateur.
+
+## Configuration API n8n
+- Modifie l’URL du webhook n8n dans `ProspectSearchForm.tsx` si besoin.
+- Assure-toi que le workflow n8n est actif et accessible.
+
+## Personnalisation
+- Les couleurs, avatars, et animations sont configurables dans les fichiers `components/` et `lib/`.
+- Le mode sombre est activable via le bouton dans le header.
+
+## Dépendances principales
+- next
+- react
+- jotai
+- tailwindcss
+- framer-motion
+- chart.js
+- react-chartjs-2
+- lucide-react
+- sonner
+
+## Contribution
+Les PR et suggestions sont les bienvenues !
+
+## Licence
+MIT
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
