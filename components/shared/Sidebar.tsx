@@ -7,20 +7,20 @@ import { Mail, Search, Send } from 'lucide-react';
 
 const navItems = [
   {
-    name: 'Prospecting',
+    name: 'Campagne',
     href: '/prospecting',
     icon: Search,
   },
   {
-    name: 'Campaigns',
+    name: 'Prospects',
     href: '/campaigns',
     icon: Send,
   },
-  {
-    name: 'Inbox',
-    href: '/inbox',
-    icon: Mail,
-  },
+  // {
+  //   name: 'Inbox',
+  //   href: '/inbox',
+  //   icon: Mail,
+  // },
 ];
 
 export function Sidebar() {
@@ -32,7 +32,7 @@ export function Sidebar() {
         <span className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg animate-bounce">
           <Search className="w-6 h-6 text-white" />
         </span>
-        <span className="text-xl font-bold tracking-wide">Prospection</span>
+        <span className="text-xl font-bold tracking-wide">ProstIx Agent</span>
       </div>
       <nav className="flex-1">
         <ul className="space-y-2">
