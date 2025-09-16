@@ -10,30 +10,11 @@ import { generateFakeProspects, Prospect } from '@/lib/fakeData';
 
 export default function CampaignsPage() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
-  const [campaignRunning, setCampaignRunning] = useState(false);
 
   useEffect(() => {
     setProspects(generateFakeProspects(10));
   }, []);
-
-  useEffect(() => {
-    if (!campaignRunning) return;
-    const interval = setInterval(() => {
-      setProspects((prevProspects) => {
-        const updated = prevProspects.map((prospect) =>
-          prospect.status !== 'envoyé'
-            ? { ...prospect, status: 'envoyé' as Prospect['status'] }
-            : prospect
-        );
-        if (updated.every((p) => p.status === 'envoyé')) {
-          clearInterval(interval);
-        }
-        return updated;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [campaignRunning]);
-
+  
   const handleStartCampaign = () => {
     setCampaignRunning(true);
   };
@@ -45,8 +26,8 @@ export default function CampaignsPage() {
           <Send className="w-7 h-7" />
         </span>
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight leading-tight">Gestion des Campagnes</h1>
-          <h2 className="text-base font-medium text-blue-700 mt-1">Suivez et gérez vos campagnes d’envoi de messages</h2>
+          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight leading-tight">Gestion des prospects</h1>
+          <h2 className="text-base font-medium text-blue-700 mt-1">Suivez et gérez vos prospects</h2>
           <p className="text-sm text-gray-500 mt-1">Lancez une campagne, surveillez le statut de chaque prospect et optimisez vos résultats.</p>
         </div>
       </div>
@@ -55,12 +36,12 @@ export default function CampaignsPage() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-bold text-blue-700">Campagne d'envoi de messages</CardTitle>
-            <Button 
+            {/* <Button 
               onClick={handleStartCampaign}
               className="transition-all duration-200 active:scale-95 active:shadow-xl focus:scale-105 focus:shadow-lg hover:ring-2 hover:ring-blue-400 cursor-pointer"
             >
               Démarrer l'envoi
-            </Button>
+            </Button> */}
           </div>
         </CardHeader>
         <CardContent>

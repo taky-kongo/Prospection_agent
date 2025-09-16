@@ -4,52 +4,89 @@ import { LogEntry, generateFakeLog } from '@/lib/fakeData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 
+interface Prospect {
+  id: string;
+  name: string;
+  title: string;
+  link: string;
+  email: string;
+  // ... other fields
+}
 
-export function RealTimeLog({ searchStarted }: { searchStarted: boolean }) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!searchStarted) {
-      setLogs([]);
-      setIsLoading(true);
-      return;
-    }
-    const fakeLogs = generateFakeLog();
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < fakeLogs.length) {
-        setLogs((prevLogs) => {
-          const newLog = fakeLogs[index];
-          index++;
-          return newLog ? [...prevLogs, newLog] : prevLogs;
-        });
-        setIsLoading(false);
-      } else {
-        clearInterval(interval);
-        setIsLoading(false);
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [searchStarted]);
+export function RealTimeLog({ searchStarted, searchResults, isLoading }: { searchStarted: boolean, searchResults: Prospect[], isLoading: boolean }) {
 
   return (
-    <Card className="h-96 overflow-y-auto">
+    <Card className="h-130 overflow-y-auto">
       <CardHeader>
-        <CardTitle className="text-lg">Journal des événements</CardTitle>
+        <CardTitle className="text-lg">Profils correspondants</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
-        {isLoading && logs.length === 0 ? (
-          <p className="text-gray-500 italic">En attente d'un lancement de recherche...</p>
+        {!searchStarted && (
+          <p className="text-gray-500 italic text-center">
+            Lancez une recherche pour voir les résultats ici... 🔎
+          </p>
+        )}
+
+        {searchStarted && searchResults.length === 0 && (
+          <p className="text-gray-500 italic text-center">
+            Recherche en cours ou aucun résultat trouvé.
+          </p>
+        )}
+
+        {isLoading && searchResults.length === 0 ? (
+          <p className="text-gray-500 italic">Lancement de la recherche en cours...</p>
         ) : (
-          logs.map((log, index) => (
-            <div key={index} className="flex space-x-2 text-gray-600">
-              <span className="font-mono text-xs text-gray-400 shrink-0">
-                [{log.timestamp}]
-              </span>
-              <span>{log.message}</span>
+          searchResults.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nom
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Profil
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status message
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {searchResults.map((prospect, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {prospect.name || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {prospect.title || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {prospect.link ? (
+                          <a
+                            href={prospect.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            {prospect.link}
+                          </a>
+                        ) : (
+                          'N/A'
+                        )}
+                      </td>
+                      <td>
+
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))
+          )
         )}
       </CardContent>
     </Card>
