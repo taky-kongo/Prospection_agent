@@ -31,38 +31,48 @@ const getStatusColor = (status: Prospect['status']) => {
 
 
 export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
+  if (!Array.isArray(prospects)) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        Erreur : les données prospects ne sont pas valides.
+      </div>
+    );
+  }
   return (
     <div
-      style={{ width: '100%', overflowX: 'auto', overflowY: 'auto', maxHeight: '60vh' }}
-      className="overflow-x-auto overflow-y-auto w-full max-h-[60vh]"
+      className="w-full overflow-x-auto max-h-[60vh]"
+      tabIndex={0}
+      aria-label="Tableau des prospects"
+      role="region"
+      style={{ WebkitOverflowScrolling: 'touch' }}
     >
-      <Table className="min-w-[1000px] max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+      <Table
+        className="min-w-[600px] w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md"
+        aria-label="Liste des prospects"
+      >
+        <caption className="sr-only">Liste des prospects de la campagne</caption>
         <TableHeader>
           <TableRow>
-            <TableHead>Nom</TableHead>
-            <TableHead>Titre</TableHead>
-            <TableHead>Lien</TableHead>
-            <TableHead>Snippet</TableHead>
-            <TableHead className="text-right">Statut</TableHead>
+            <TableHead scope="col">Nom</TableHead>
+            <TableHead scope="col">Titre</TableHead>
+            <TableHead scope="col">Lien</TableHead>
+            <TableHead scope="col">Snippet</TableHead>
+            <TableHead scope="col" className="text-right">Statut</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {prospects.map((prospect, idx) => (
-            <TableRow key={prospect.id || idx}>
-              <TableCell className="font-medium max-w-[120px] break-words whitespace-pre-line">{prospect.name}</TableCell>
-              <TableCell className="max-w-[220px] break-words whitespace-pre-line">{prospect.title}</TableCell>
-              <TableCell className="max-w-[120px] break-words whitespace-pre-line">
+            <TableRow key={prospect.id || idx} tabIndex={0} aria-label={`Prospect ${prospect.name || idx}`}> 
+              <TableCell className="font-medium max-w-[120px] break-words whitespace-pre-line text-sm md:text-base">{prospect.name}</TableCell>
+              <TableCell className="max-w-[180px] break-words whitespace-pre-line text-xs md:text-base">{prospect.title}</TableCell>
+              <TableCell className="max-w-[100px] break-words whitespace-pre-line text-xs md:text-base">
                 {prospect.link ? (
-                  <a href={prospect.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                    Voir profil
-                  </a>
+                  <a href={prospect.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline focus:outline focus:outline-2 focus:outline-blue-400" tabIndex={0} aria-label={`Voir le profil de ${prospect.name}`}>Voir profil</a>
                 ) : '-'}
               </TableCell>
-              <TableCell className="max-w-[320px] break-words whitespace-pre-line">{prospect.snippet}</TableCell>
+              <TableCell className="max-w-[200px] break-words whitespace-pre-line text-xs md:text-base">{prospect.snippet}</TableCell>
               <TableCell className="text-right">
-                <Badge className="bg-blue-500 text-white">
-                  {prospect.envoi_message || '—'}
-                </Badge>
+                <Badge className="bg-blue-500 text-white text-xs md:text-base" aria-label={`Statut: ${prospect.envoi_message || '—'}`}>{prospect.envoi_message || '—'}</Badge>
               </TableCell>
             </TableRow>
           ))}
