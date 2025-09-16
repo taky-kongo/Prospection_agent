@@ -10,13 +10,16 @@ import { useState, useEffect } from 'react';
 
 export default function CampaignsPage() {
   const [prospects, setProspects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const sheetId = '1oavCo85kTfYGMeqQZYGK6-8JGTXeiE0n5OE-Gt0y4xU'; // Remplace par ton vrai sheetId si besoin
 
   useEffect(() => {
+    setIsLoading(true);
     fetch(`/api/sheets/${sheetId}?sheetName=Feuille1`)
       .then(res => res.json())
       .then(data => setProspects(data))
-      .catch(() => setProspects([]));
+      .catch(() => setProspects([]))
+      .finally(() => setIsLoading(false));
   }, []);
 
   return (
@@ -35,6 +38,7 @@ export default function CampaignsPage() {
       <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
         <CardHeader>
           <div className="flex justify-between items-center">
+            {/*
             <CardTitle className="text-xl font-bold text-blue-700">Campagne d'envoi de messages</CardTitle>
             {/*
             // Pour activer le bouton de lancement de campagne, décommentez ci-dessous et ajoutez la logique souhaitée :
@@ -48,8 +52,14 @@ export default function CampaignsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Tableau des prospects */}
-          <CampaignStatusTable prospects={prospects} />
+          {/* Animation de chargement */}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <span className="inline-block w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" aria-label="Chargement..." />
+            </div>
+          ) : (
+            <CampaignStatusTable prospects={prospects} />
+          )}
         </CardContent>
       </Card>
     </div>

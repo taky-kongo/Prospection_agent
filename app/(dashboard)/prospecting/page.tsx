@@ -1,23 +1,17 @@
 "use client";
 import { useState } from 'react';
+import type { Prospect as ProspectType } from '@/lib/fakeData';
 import { ProspectSearchForm } from '@/components/dashboard/prospecting/ProspectSearchForm';
 import { RealTimeLog } from '@/components/dashboard/prospecting/RealTimeLog';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Prospect {
-  id: string;
-  name: string;
-  title: string;
-  company: string;
-  email: string;
-  // ... other fields
-}
+
 
 export default function ProspectingPage() {
   const [searchStarted, setSearchStarted] = useState(false);
-  const [searchResults, setSearchResults] = useState<Prospect[]>([]);
+  const [searchResults, setSearchResults] = useState<ProspectType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -28,7 +22,7 @@ export default function ProspectingPage() {
     setError(null);
   };
 
-  const handleSearchResults = (results: Prospect[]) => {
+  const handleSearchResults = (results: ProspectType[]) => {
     setSearchResults(results);
     setIsLoading(false);
   };
@@ -60,7 +54,7 @@ export default function ProspectingPage() {
         const response = await res.json();
         console.log(response);
         // Supposons que l'API retourne un tableau de prospects (à ajuster selon la réponse réelle)
-        const prospects: Prospect[] = response?.data || [];
+        const prospects: ProspectType[] = response?.data || [];
         handleSearchResults(prospects);
         setQuery('');
         toast.success('Recherche lancée avec succès.');
