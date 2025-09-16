@@ -51,7 +51,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
         aria-label="Liste des prospects"
       >
         <caption className="sr-only">Liste des prospects de la campagne</caption>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200">
           <TableRow>
             <TableHead scope="col">Nom</TableHead>
             <TableHead scope="col">Titre</TableHead>
@@ -61,7 +61,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {prospects.map((prospect, idx) => (
+          {prospects.slice(1).map((prospect, idx) => (
             <TableRow key={prospect.id || idx} tabIndex={0} aria-label={`Prospect ${prospect.name || idx}`}> 
               <TableCell className="font-medium max-w-[120px] break-words whitespace-pre-line text-sm md:text-base">{prospect.name}</TableCell>
               <TableCell className="max-w-[180px] break-words whitespace-pre-line text-xs md:text-base">{prospect.title}</TableCell>
