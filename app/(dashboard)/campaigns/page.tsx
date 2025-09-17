@@ -1,26 +1,69 @@
 'use client';
 
-
+import { useState, useEffect, useMemo } from 'react';
 import { CampaignStatusTable } from '@/components/dashboard/campaigns/CampaignStatusTable';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, Send } from 'lucide-react';
-import { useState, useEffect } from 'react';
-// import { generateFakeProspects, Prospect } from '@/lib/fakeData';
+import { toast } from 'sonner';
+import { BarChart3, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function CampaignsPage() {
   const [prospects, setProspects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const sheetId = '1oavCo85kTfYGMeqQZYGK6-8JGTXeiE0n5OE-Gt0y4xU'; // Remplace par ton vrai sheetId si besoin
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const uniqueStatuses = useMemo(() => {
+    if (prospects.length === 0) return [];
+    const statuses = prospects.map(p => p.status).filter(Boolean); // Filtre les valeurs vides/null
+    return ['all', ...Array.from(new Set(statuses))];
+  }, [prospects]);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetch(`/api/sheets/${sheetId}?sheetName=Feuille1`)
-      .then(res => res.json())
-      .then(data => setProspects(data))
-      .catch(() => setProspects([]))
-      .finally(() => setIsLoading(false));
+    const fetchProspects = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/sheets/1oavCo85kTfYGMeqQZYGK6-8JGTXeiE0n5OE-Gt0y4xU');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erreur lors de la récupération des données');
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setProspects(data);
+        } else {
+          throw new Error('Le format des données est incorrect.');
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Impossible de charger les prospects.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProspects();
   }, []);
+
+  const filteredProspects = useMemo(() => {
+    return prospects.filter(prospect => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = 
+        prospect.name?.toLowerCase().includes(searchLower) ||
+        prospect.title?.toLowerCase().includes(searchLower);
+      
+      const matchesStatus = 
+        statusFilter === 'all' || prospect.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [prospects, searchQuery, statusFilter]);
 
   return (
     <div className="flex flex-col space-y-6 p-6 bg-gradient-to-br from-stone-50 via-white to-stone-100">
@@ -30,35 +73,43 @@ export default function CampaignsPage() {
         </span>
         <div>
           <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight">Statut des Campagnes</h1>
-          <h2 className="text-base font-medium text-blue-600 mt-1">Suivez et gérez vos prospects</h2>
-          <p className="text-sm text-stone-500 mt-1">Suivez le statut de chaque prospect et optimisez vos résultats.</p>
+          <p className="text-sm text-stone-500 mt-1">Recherchez, filtrez et suivez le statut de vos prospects.</p>
         </div>
       </div>
 
+      {/* Barre de recherche et filtres */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher par nom, titre..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filtrer par statut" />
+          </SelectTrigger>
+          <SelectContent>
+            {uniqueStatuses.map(status => (
+              <SelectItem key={status} value={status} className="capitalize">
+                {status === 'all' ? 'Tous les statuts' : status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            {/*
-            <CardTitle className="text-xl font-bold text-blue-700">Campagne d'envoi de messages</CardTitle>
-            {/*
-            // Pour activer le bouton de lancement de campagne, décommentez ci-dessous et ajoutez la logique souhaitée :
-            // <Button
-            //   onClick={handleStartCampaign}
-            //   className="transition-all duration-200 active:scale-95 active:shadow-xl focus:scale-105 focus:shadow-lg hover:ring-2 hover:ring-blue-400 cursor-pointer"
-            // >
-            //   Démarrer l'envoi
-            // </Button>
-            */}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Animation de chargement */}
+        <CardContent className="p-0">
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
               <span className="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" aria-label="Chargement..." />
             </div>
           ) : (
-            <CampaignStatusTable prospects={prospects} />
+            <CampaignStatusTable prospects={filteredProspects} />
           )}
         </CardContent>
       </Card>
