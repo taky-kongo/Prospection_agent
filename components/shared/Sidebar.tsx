@@ -2,58 +2,54 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  Users,
+  BarChart3,
+  Settings,
+  Bot,
+  LayoutDashboard,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Mail, Search, Send } from 'lucide-react';
 
-const navItems = [
-  {
-    name: 'Campagne',
-    href: '/prospecting',
-    icon: Search,
-  },
-  {
-    name: 'Prospects',
-    href: '/campaigns',
-    icon: Send,
-  },
-  // {
-  //   name: 'Inbox',
-  //   href: '/inbox',
-  //   icon: Mail,
-  // },
+const links = [
+  // { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Prospecting', href: '/prospecting', icon: Bot },
+  { name: 'Campaigns', href: '/campaigns', icon: BarChart3 },
+  // { name: 'Prospects', href: '/prospects', icon: Users },
+  // { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-white p-4 space-y-4 shadow-xl">
-      <div className="flex items-center gap-2 mb-6">
-        <span className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center shadow-lg animate-bounce">
-          <Search className="w-6 h-6 text-white" />
-        </span>
-        <span className="text-xl font-bold tracking-wide">ProstIx Agent</span>
+    <aside className="w-64 bg-stone-100 text-stone-800 flex flex-col border-r border-stone-200">
+      <div className="p-6">
+        <h1 className="text-2xl font-bold text-blue-600">ProstIx Agent</h1>
       </div>
-      <nav className="flex-1">
-        <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.name}>
+      <nav className="flex-1 px-4">
+        <ul>
+          {links.map((link) => (
+            <li key={link.name} className="mb-2">
               <Link
-                href={item.href}
+                href={link.href}
                 className={cn(
-                  'flex items-center space-x-3 p-2 rounded-lg transition-all duration-200 group',
-                  pathname === item.href
-                    ? 'bg-blue-600 text-white shadow-lg scale-105'
-                    : 'hover:bg-blue-500 hover:text-white hover:scale-105'
+                  'flex items-center p-3 rounded-lg transition-colors',
+                  pathname === link.href
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'hover:bg-stone-200'
                 )}
               >
-                <item.icon className={cn('w-5 h-5 transition-transform duration-200', pathname === item.href ? 'animate-spin' : 'group-hover:scale-110')} />
-                <span className="font-semibold tracking-wide">{item.name}</span>
+                <link.icon className="w-5 h-5 mr-3" />
+                {link.name}
               </Link>
             </li>
           ))}
         </ul>
       </nav>
+      <div className="p-4 border-t border-stone-200">
+        {/* User profile or other footer content can go here */}
+      </div>
     </aside>
   );
 }

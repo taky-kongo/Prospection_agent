@@ -4,7 +4,7 @@
 import { CampaignStatusTable } from '@/components/dashboard/campaigns/CampaignStatusTable';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Send } from 'lucide-react';
+import { BarChart3, Send } from 'lucide-react';
 import { useState, useEffect } from 'react';
 // import { generateFakeProspects, Prospect } from '@/lib/fakeData';
 
@@ -23,15 +23,15 @@ export default function CampaignsPage() {
   }, []);
 
   return (
-    <div className="flex flex-col space-y-6 min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6">
+    <div className="flex flex-col space-y-6 p-6 bg-gradient-to-br from-stone-50 via-white to-stone-100">
       <div className="flex items-center gap-3 mb-2">
-        <span className="bg-blue-500 text-white rounded-full p-2 shadow-lg">
-          <Send className="w-7 h-7" />
+        <span className="bg-blue-600 text-white rounded-full p-2 shadow-lg">
+          <BarChart3 className="w-7 h-7" />
         </span>
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight leading-tight">Gestion des prospects</h1>
-          <h2 className="text-base font-medium text-blue-700 mt-1">Suivez et gérez vos prospects</h2>
-          <p className="text-sm text-gray-500 mt-1">Lancez une campagne, surveillez le statut de chaque prospect et optimisez vos résultats.</p>
+          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight">Statut des Campagnes</h1>
+          <h2 className="text-base font-medium text-blue-600 mt-1">Suivez et gérez vos prospects</h2>
+          <p className="text-sm text-stone-500 mt-1">Suivez le statut de chaque prospect et optimisez vos résultats.</p>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export default function CampaignsPage() {
           {/* Animation de chargement */}
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
-              <span className="inline-block w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" aria-label="Chargement..." />
+              <span className="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" aria-label="Chargement..." />
             </div>
           ) : (
             <CampaignStatusTable prospects={prospects} />

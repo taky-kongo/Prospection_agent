@@ -6,14 +6,12 @@ import { usePathname } from 'next/navigation';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="flex min-h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-stone-50 overflow-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col h-screen">
+      <div className="flex-1 flex flex-col min-w-0"> {/* Ajout de min-w-0 ici */}
         <Header />
-        <main className="flex-1 min-h-0 overflow-hidden flex flex-col p-0">
-          <div className="h-full flex flex-col">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto">
+          {children}
         </main>
       </div>
     </div>
