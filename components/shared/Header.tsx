@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Bell, User, LogOut, Settings } from 'lucide-react';
+import { Bell, User, LogOut, Settings, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -13,24 +13,28 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-// Fonction pour obtenir le titre de la page à partir du chemin
+// ... (getPageTitle function remains the same)
 const getPageTitle = (pathname: string) => {
   const name = pathname.split('/').pop();
   if (!name) return 'Dashboard';
-  // Met la première lettre en majuscule
   return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
-export function Header() {
+export function Header({ isCollapsed, onToggleCollapse }: { isCollapsed: boolean, onToggleCollapse: () => void }) {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-stone-200 bg-stone-100 px-6 shrink-0">
-      <div className="flex items-center">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={onToggleCollapse} className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200">
+          {isCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          <span className="sr-only">Toggle Sidebar</span>
+        </Button>
         <h1 className="text-xl font-semibold text-stone-800">{title}</h1>
       </div>
       <div className="flex items-center gap-4">
+        {/* ... (le reste du header ne change pas) ... */}
         <Button variant="ghost" size="icon" className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200">
           <Bell className="h-5 w-5" />
           <span className="sr-only">Notifications</span>
