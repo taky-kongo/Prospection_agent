@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { CampaignTableSkeleton } from '@/components/dashboard/campaigns/CampaignTableSkeleton';
 
 export default function CampaignsPage() {
   const [prospects, setProspects] = useState<any[]>([]);
@@ -105,9 +106,7 @@ export default function CampaignsPage() {
       <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <span className="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" aria-label="Chargement..." />
-            </div>
+            <CampaignTableSkeleton />
           ) : (
             <CampaignStatusTable prospects={filteredProspects} />
           )}
