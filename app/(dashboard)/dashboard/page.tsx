@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
         // Préparation des données pour le graphique
         const statusCounts = prospects.reduce((acc, p) => {
-          const status = p.status || 'Non défini';
+          const status = p.status || 'En attente de réponse';
           acc[status] = (acc[status] || 0) + 1;
           return acc;
         }, {});
