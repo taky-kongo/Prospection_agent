@@ -18,9 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Inbox, CheckCircle2, Clock, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Inbox, CheckCircle2, Clock, ChevronsLeft, ChevronsRight, MoreHorizontal } from 'lucide-react';
 
-// ... (La fonction getStatusVariant ne change pas)
+// Fonction pour déterminer la couleur du badge en fonction du statut
 const getStatusVariant = (status?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
   if (!status) return 'secondary';
   const lowerCaseStatus = status.toLowerCase();
@@ -40,9 +48,9 @@ const getStatusVariant = (status?: string): 'default' | 'secondary' | 'destructi
 
 export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // État modifiable
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  if (!Array.isArray(prospects) || prospects.length < 2) {
+  if (!Array.isArray(prospects) || prospects.length === 0) {
     return (
       <div className="text-center text-stone-500 py-16 flex flex-col items-center gap-4 bg-stone-50/50 rounded-lg border border-dashed">
         <Inbox className="w-12 h-12 text-stone-400" />
@@ -52,10 +60,11 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
     );
   }
 
-  // ... (La logique d'extraction des headers et dataRows ne change pas)
-  const isArrayOfArrays = Array.isArray(prospects[0]);
-  const headers = isArrayOfArrays ? prospects[0] : Object.keys(prospects[0]);
-  const dataRows = isArrayOfArrays ? prospects.slice(2) : prospects.slice(1);
+  // Les données sont des objets, donc isArrayOfArrays sera faux.
+  // On garde la logique pour la robustesse, mais on s'attend à des objets.
+  const isArrayOfArrays = Array.isArray(prospects[0]) && !Object.keys(prospects[0]).includes('name');
+  const headers = Object.keys(prospects[0] || {});
+  const dataRows = prospects.slice(1); // On ignore la première ligne de données
   
   // Calculs pour la pagination
   const totalPages = Math.ceil(dataRows.length / itemsPerPage);
@@ -63,14 +72,14 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
   const endIndex = startIndex + itemsPerPage;
   const currentRows = dataRows.slice(startIndex, endIndex);
 
-  // ... (La logique de recherche des index de colonnes ne change pas)
-  const statusColumnIndex = headers.findIndex(h => typeof h === 'string' && h.toLowerCase() === 'status');
-  const nameColumnIndex = headers.findIndex(h => typeof h === 'string' && h.toLowerCase() === 'name');
-  const envoiMessageColumnIndex = headers.findIndex(h => typeof h === 'string' && h.toLowerCase().replace(/_/g, '') === 'envoimessage');
+  // Trouver l'index des colonnes importantes
+  const statusColumnIndex = headers.findIndex(h => h.toLowerCase() === 'status');
+  const nameColumnIndex = headers.findIndex(h => h.toLowerCase() === 'name');
+  const envoiMessageColumnIndex = headers.findIndex(h => h.toLowerCase().replace(/_/g, '') === 'envoimessage');
 
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
-    setCurrentPage(1); // Revenir à la première page
+    setCurrentPage(1);
   };
 
 
@@ -79,26 +88,29 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
       <div className="overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader>
-            {/* ... Le TableHeader ne change pas ... */}
             <TableRow className="border-b-stone-200">
               {headers.map((header, index) => (
                 <TableHead key={index} className="h-12 px-4 text-left align-middle font-medium text-stone-500 uppercase text-xs tracking-wider">
                   {header}
                 </TableHead>
               ))}
+              <TableHead className="relative px-4">
+                <span className="sr-only">Actions</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentRows.map((row, idx) => { // On utilise currentRows ici
-              const rowData = isArrayOfArrays ? row : Object.values(row);
-              if (!Array.isArray(rowData) || rowData.length === 0) return null;
+            {currentRows.map((row, idx) => {
+              const rowData = Object.values(row);
+              if (!rowData || rowData.length === 0) return null;
 
               return (
                 <TableRow key={idx} className="hover:bg-stone-50 transition-colors duration-150 border-b-stone-200">
-                  {/* ... La logique d'affichage des cellules ne change pas ... */}
-                  {rowData.map((cell: any, cellIdx: number) => {
+                  {headers.map((header, cellIdx) => {
+                    const cell = row[header];
                     const cellClasses = "p-4 align-top break-words whitespace-normal max-w-xs";
-                    if (envoiMessageColumnIndex !== -1 && cellIdx === envoiMessageColumnIndex) {
+
+                    if (header.toLowerCase().replace(/_/g, '') === 'envoimessage') {
                       const hasValue = cell && cell.toString().trim() !== '';
                       return (
                         <TableCell key={cellIdx} className={cellClasses}>
@@ -116,7 +128,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                         </TableCell>
                       );
                     }
-                    if (statusColumnIndex !== -1 && cellIdx === statusColumnIndex) {
+                    if (header.toLowerCase() === 'status') {
                       return (
                         <TableCell key={cellIdx} className={cellClasses}>
                           <Badge variant={getStatusVariant(cell)} className="capitalize text-xs font-semibold">
@@ -125,7 +137,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                         </TableCell>
                       );
                     }
-                    if (nameColumnIndex !== -1 && cellIdx === nameColumnIndex) {
+                    if (header.toLowerCase() === 'name') {
                       return (
                         <TableCell key={cellIdx} className={`${cellClasses} font-medium text-stone-900`}>
                           {cell}
@@ -138,6 +150,27 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                       </TableCell>
                     );
                   })}
+                  <TableCell className="p-4 align-top text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Ouvrir le menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => alert(`Voir le profil de ${row.name}`)}>
+                          Voir le profil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Modifier le statut</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-500 focus:text-red-500 focus:bg-red-50">
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               );
             })}
