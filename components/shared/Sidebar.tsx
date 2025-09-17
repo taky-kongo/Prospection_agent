@@ -12,7 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const links = [
-  // { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Prospecting', href: '/prospecting', icon: Bot },
   { name: 'Campaigns', href: '/campaigns', icon: BarChart3 },
   // { name: 'Prospects', href: '/prospects', icon: Users },
