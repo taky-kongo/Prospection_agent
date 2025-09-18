@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { CommandPalette } from './CommandPalette'; // Importez le nouveau composant
+import { CommandPalette } from './CommandPalette';
+import { ThemeToggle } from './ThemeToggle';
 
 // ... (getPageTitle function remains the same)
 const getPageTitle = (pathname: string) => {
@@ -29,14 +30,14 @@ export function Header({ isCollapsed, onToggleCollapse }: { isCollapsed: boolean
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between border-b border-stone-200 bg-stone-100 px-6 shrink-0">
+      <header className="flex h-16 items-center justify-between border-b border-stone-200 bg-stone-100 px-6 shrink-0 dark:bg-stone-900 dark:border-stone-800">
         {/* Groupe de gauche */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onToggleCollapse} className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200">
+          <Button variant="ghost" size="icon" onClick={onToggleCollapse} className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-800">
             {isCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
-          <h1 className="text-xl font-semibold text-stone-800">{title}</h1>
+          <h1 className="text-xl font-semibold text-stone-800 dark:text-stone-200">{title}</h1>
         </div>
 
         {/* Barre de recherche centrale (devient un bouton) */}
@@ -44,19 +45,20 @@ export function Header({ isCollapsed, onToggleCollapse }: { isCollapsed: boolean
           <Button
             variant="outline"
             onClick={() => setOpenCommandPalette(true)}
-            className="relative w-full max-w-md justify-start text-muted-foreground bg-white"
+            className="relative w-full max-w-md justify-start text-muted-foreground bg-white dark:bg-stone-800 dark:text-stone-400 dark:border-stone-700"
           >
             <Search className="h-4 w-4 mr-2" />
             Rechercher dans l'application...
-            <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+            <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex dark:border-stone-700">
               <span className="text-xs">⌘</span>K
             </kbd>
           </Button>
         </div>
 
         {/* Groupe de droite */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button variant="ghost" size="icon" className="rounded-full text-stone-600 hover:text-stone-900 hover:bg-stone-200 dark:text-stone-400 dark:hover:text-stone-100 dark:hover:bg-stone-700">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Notifications</span>
           </Button>
