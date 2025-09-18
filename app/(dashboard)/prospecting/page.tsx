@@ -1,25 +1,56 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { toast } from 'sonner';
 import { ProspectSearchForm } from '@/components/dashboard/prospecting/ProspectSearchForm';
 import { RealTimeLog } from '@/components/dashboard/prospecting/RealTimeLog';
 import { Bot } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ProspectingPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchStarted, setSearchStarted] = useState(false);
+  const [query, setQuery] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
 
-  const handleSubmit = async (query: string) => {
+  // Charger l'historique depuis le localStorage au montage du composant
+  useEffect(() => {
+    try {
+      const storedHistory = localStorage.getItem('prospecting_history');
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error("Échec de la lecture de l'historique depuis localStorage", error);
+    }
+  }, []);
+
+  const updateHistory = (newQuery: string) => {
+    // Empêche l'ajout de requêtes vides à l'historique
+    if (!newQuery.trim()) return;
+    
+    // Crée un nouvel historique sans doublons et limité à 5 éléments
+    const updatedHistory = [newQuery, ...history.filter(h => h !== newQuery)].slice(0, 5);
+    setHistory(updatedHistory);
+    try {
+      localStorage.setItem('prospecting_history', JSON.stringify(updatedHistory));
+    } catch (error) {
+      console.error("Échec de la sauvegarde de l'historique dans localStorage", error);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault(); // Empêche le rechargement de la page
     if (!query) {
       toast.error('Veuillez entrer une requête de recherche.');
       return;
     }
 
+    updateHistory(query);
     setIsLoading(true);
     setSearchStarted(true);
-    setSearchResults([]); // Réinitialiser les résultats précédents
+    setSearchResults([]);
 
     try {
       const response = await fetch('https://prontix.app.n8n.cloud/webhook-test/a2a1553a-ac8a-4b6a-a23a-45a752252a9d', {
@@ -35,13 +66,18 @@ export default function ProspectingPage() {
       }
 
       const result = await response.json();
-      setSearchResults(result.data);
+      setSearchResults(result.data || []);
       toast.success('Recherche lancée avec succès !');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Gère le clic sur un élément de l'historique
+  const handleHistoryClick = (historyQuery: string) => {
+    setQuery(historyQuery);
   };
 
   return (
@@ -60,7 +96,24 @@ export default function ProspectingPage() {
         </div>
       </div>
 
-      <ProspectSearchForm onSubmit={handleSubmit} isLoading={isLoading} />
+      <Card className="shadow-xl border-0 bg-white/80 backdrop-blur dark:bg-stone-900/80 dark:border-stone-800">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold text-stone-800 dark:text-stone-200">
+            Définir la recherche
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProspectSearchForm
+            query={query}
+            setQuery={setQuery}
+            handleSubmit={handleSubmit}
+            isLoading={isLoading}
+            history={history}
+            onHistoryClick={handleHistoryClick}
+          />
+        </CardContent>
+      </Card>
+      
       <RealTimeLog searchStarted={searchStarted} isLoading={isLoading} results={searchResults} />
     </div>
   );
