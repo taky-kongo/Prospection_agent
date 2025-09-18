@@ -52,30 +52,21 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
 
   if (!Array.isArray(prospects) || prospects.length === 0) {
     return (
-      <div className="text-center text-stone-500 py-16 flex flex-col items-center gap-4 bg-stone-50/50 rounded-lg border border-dashed">
+      <div className="text-center text-stone-500 py-16 flex flex-col items-center gap-4 bg-stone-50/50 dark:bg-stone-900/50 rounded-lg border border-dashed dark:border-stone-800">
         <Inbox className="w-12 h-12 text-stone-400" />
-        <h3 className="text-lg font-semibold">Aucun prospect à afficher</h3>
-        <p className="text-sm">Les données de votre campagne apparaîtront ici.</p>
+        <h3 className="text-lg font-semibold dark:text-stone-300">Aucun prospect à afficher</h3>
+        <p className="text-sm dark:text-stone-500">Les données de votre campagne apparaîtront ici.</p>
       </div>
     );
   }
 
-  // Les données sont des objets, donc isArrayOfArrays sera faux.
-  // On garde la logique pour la robustesse, mais on s'attend à des objets.
-  const isArrayOfArrays = Array.isArray(prospects[0]) && !Object.keys(prospects[0]).includes('name');
   const headers = Object.keys(prospects[0] || {});
-  const dataRows = prospects.slice(1); // On ignore la première ligne de données
+  const dataRows = prospects.slice(1);
   
-  // Calculs pour la pagination
   const totalPages = Math.ceil(dataRows.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentRows = dataRows.slice(startIndex, endIndex);
-
-  // Trouver l'index des colonnes importantes
-  const statusColumnIndex = headers.findIndex(h => h.toLowerCase() === 'status');
-  const nameColumnIndex = headers.findIndex(h => h.toLowerCase() === 'name');
-  const envoiMessageColumnIndex = headers.findIndex(h => h.toLowerCase().replace(/_/g, '') === 'envoimessage');
 
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
@@ -84,28 +75,25 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
 
 
   return (
-    <div className="w-full rounded-lg border border-stone-200 shadow-sm bg-white">
+    <div className="w-full rounded-lg border border-stone-200 shadow-sm bg-white dark:bg-stone-900 dark:border-stone-800">
       <div className="overflow-x-auto">
         <Table className="min-w-full">
-          <TableHeader>
-            <TableRow className="border-b-stone-200">
+          <TableHeader className="bg-transparent"><TableRow className="border-b-stone-200 dark:border-b-stone-800 hover:bg-transparent">
               {headers.map((header, index) => (
-                <TableHead key={index} className="h-12 px-4 text-left align-middle font-medium text-stone-500 uppercase text-xs tracking-wider">
+                <TableHead key={index} className="h-12 px-4 text-left align-middle font-medium text-stone-500 uppercase text-xs tracking-wider dark:text-stone-400">
                   {header}
                 </TableHead>
               ))}
               <TableHead className="relative px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
-            </TableRow>
-          </TableHeader>
+            </TableRow></TableHeader>
           <TableBody>
             {currentRows.map((row, idx) => {
-              const rowData = Object.values(row);
-              if (!rowData || rowData.length === 0) return null;
+              if (!row || typeof row !== 'object') return null;
 
               return (
-                <TableRow key={idx} className="hover:bg-stone-50 transition-colors duration-150 border-b-stone-200">
+                <TableRow key={idx} className="hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-150 border-b-stone-200 dark:border-b-stone-800">
                   {headers.map((header, cellIdx) => {
                     const cell = row[header];
                     const cellClasses = "p-4 align-top break-words whitespace-normal max-w-xs";
@@ -115,12 +103,12 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                       return (
                         <TableCell key={cellIdx} className={cellClasses}>
                           {hasValue ? (
-                            <div className="flex items-center gap-2 text-green-600">
+                            <div className="flex items-center gap-2 text-green-600 dark:text-green-500">
                               <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
                               <span className="font-medium text-xs">Done</span>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2 text-amber-600">
+                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
                               <Clock className="w-4 h-4 flex-shrink-0" />
                               <span className="font-medium text-xs">En attente</span>
                             </div>
@@ -139,13 +127,13 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                     }
                     if (header.toLowerCase() === 'name') {
                       return (
-                        <TableCell key={cellIdx} className={`${cellClasses} font-medium text-stone-900`}>
+                        <TableCell key={cellIdx} className={`${cellClasses} font-medium text-stone-900 dark:text-stone-100`}>
                           {cell}
                         </TableCell>
                       );
                     }
                     return (
-                      <TableCell key={cellIdx} className={`${cellClasses} text-stone-600`}>
+                      <TableCell key={cellIdx} className={`${cellClasses} text-stone-600 dark:text-stone-300`}>
                         {cell}
                       </TableCell>
                     );
@@ -153,7 +141,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                   <TableCell className="p-4 align-top text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-8 p-0 text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200">
                           <span className="sr-only">Ouvrir le menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
@@ -178,13 +166,13 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
         </Table>
       </div>
       {/* Contrôles de pagination */}
-      <div className="flex items-center justify-between p-4 border-t border-stone-200">
+      <div className="flex items-center justify-between p-4 border-t border-stone-200 dark:border-stone-800">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-stone-600">
+          <span className="text-sm font-medium text-stone-600 dark:text-stone-300">
             Page {currentPage} sur {totalPages > 0 ? totalPages : 1}
           </span>
           <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
-            <SelectTrigger className="w-auto h-9 text-sm">
+            <SelectTrigger className="w-auto h-9 text-sm dark:bg-stone-800 dark:border-stone-700">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
