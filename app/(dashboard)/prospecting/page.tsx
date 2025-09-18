@@ -1,101 +1,67 @@
 "use client";
+
 import { useState } from 'react';
-import type { Prospect as ProspectType } from '@/lib/fakeData';
+import { toast } from 'sonner';
 import { ProspectSearchForm } from '@/components/dashboard/prospecting/ProspectSearchForm';
 import { RealTimeLog } from '@/components/dashboard/prospecting/RealTimeLog';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Search } from 'lucide-react';
-import { toast } from 'sonner';
-
-
+import { Bot } from 'lucide-react';
 
 export default function ProspectingPage() {
-  const [searchStarted, setSearchStarted] = useState(false);
-  const [searchResults, setSearchResults] = useState<ProspectType[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
+  const [searchStarted, setSearchStarted] = useState(false);
 
-  const handleSearchStart = () => {
-    setSearchStarted(true);
-    setIsLoading(true);
-    setError(null);
-  };
-
-  const handleSearchResults = (results: ProspectType[]) => {
-    setSearchResults(results);
-    setIsLoading(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (query: string) => {
     if (!query) {
-      toast.error('Veuillez saisir une requête de recherche.');
+      toast.error('Veuillez entrer une requête de recherche.');
       return;
     }
 
-    handleSearchStart();
-    fetch('https://prontix.app.n8n.cloud/webhook-test/df85e0ee-937e-4dde-a5b9-308ead972e16', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: query }),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          let errorMsg = `Erreur HTTP ${res.status}`;
-          try {
-            const data = await res.json();
-            errorMsg += data?.message ? `: ${data.message}` : '';
-          } catch {}
-          throw new Error(errorMsg);
-        }
-        const response = await res.json();
-        console.log(response);
-        // Supposons que l'API retourne un tableau de prospects (à ajuster selon la réponse réelle)
-        const prospects: ProspectType[] = response?.data || [];
-        handleSearchResults(prospects);
-        setQuery('');
-        toast.success('Recherche lancée avec succès.');
-      })
-      .catch((err) => {
-        setError(err.message || 'Erreur lors du lancement de la recherche.');
-        toast.error(err.message || 'Erreur lors du lancement de la recherche.');
-        setIsLoading(false);
+    setIsLoading(true);
+    setSearchStarted(true);
+    setSearchResults([]); // Réinitialiser les résultats précédents
+
+    try {
+      const response = await fetch('https://prontix.app.n8n.cloud/webhook-test/a2a1553a-ac8a-4b6a-a23a-45a752252a9d', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
       });
+
+      if (!response.ok) {
+        throw new Error('La requête a échoué. Veuillez réessayer.');
+      }
+
+      const result = await response.json();
+      setSearchResults(result.data);
+      toast.success('Recherche lancée avec succès !');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-
   return (
-    <div className="flex flex-col space-y-6 p-6 bg-gradient-to-br from-stone-50 via-white to-stone-100">
+    <div className="flex flex-col space-y-6 p-6 bg-gradient-to-br from-stone-50 via-white to-stone-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
       <div className="flex items-center gap-3 mb-2">
         <span className="bg-blue-600 text-white rounded-full p-2 shadow-lg">
-          <Search className="w-7 h-7" />
+          <Bot className="w-7 h-7" />
         </span>
         <div>
-          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight">Recherche de Prospects</h1>
-          <p className="text-sm text-stone-500 mt-1">Lancez une recherche intelligente et suivez les résultats en temps réel pour maximiser vos opportunités.</p>
+          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight dark:text-stone-200">
+            Recherche de Prospects
+          </h1>
+          <p className="text-sm text-stone-500 mt-1 dark:text-stone-400">
+            Lancez une nouvelle recherche pour trouver des prospects pertinents.
+          </p>
         </div>
       </div>
 
-      <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-blue-600">Lancer une nouvelle recherche</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProspectSearchForm 
-            query={query}
-            setQuery={setQuery}
-            handleSubmit={handleSubmit}
-            isLoading={isLoading}
-            />
-        </CardContent>
-      </Card>
-
-      <div>
-        <RealTimeLog searchStarted={searchStarted} searchResults={searchResults} isLoading={isLoading} />
-      </div>
+      <ProspectSearchForm onSubmit={handleSubmit} isLoading={isLoading} />
+      <RealTimeLog searchStarted={searchStarted} isLoading={isLoading} results={searchResults} />
     </div>
   );
 }
