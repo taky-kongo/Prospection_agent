@@ -108,8 +108,8 @@ export default function CampaignsPage() {
           <BarChart3 className="w-7 h-7" />
         </span>
         <div>
-          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight dark:text-stone-200">Statut des Campagnes (Monday.com)</h1>
-          <p className="text-sm text-stone-500 mt-1 dark:text-stone-400">Recherchez, filtrez et suivez le statut de vos prospects depuis Monday.com.</p>
+          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight dark:text-stone-200">Statut des Campagnes</h1>
+          <p className="text-sm text-stone-500 mt-1 dark:text-stone-400">Recherchez, filtrez et suivez le statut de vos prospects.</p>
         </div>
       </div>
 
