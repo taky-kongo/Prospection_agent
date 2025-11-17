@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Inbox, CheckCircle2, Clock, ChevronsLeft, ChevronsRight, MoreHorizontal } from 'lucide-react';
+import { Inbox, ChevronsLeft, ChevronsRight, MoreHorizontal, Link as LinkIcon } from 'lucide-react';
 
 // Fonction pour déterminer la couleur du badge en fonction du statut
 const getStatusVariant = (status?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -45,10 +45,17 @@ const getStatusVariant = (status?: string): 'default' | 'secondary' | 'destructi
   return 'secondary';
 };
 
-
 export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Définir les en-têtes de colonnes que nous voulons afficher
+  const headers = useMemo(() => {
+    if (prospects.length === 0) return [];
+    // On prend les clés du premier objet prospect comme en-têtes
+    // et on filtre les clés non désirées comme 'id'
+    return Object.keys(prospects[0]).filter(key => key !== 'id');
+  }, [prospects]);
 
   if (!Array.isArray(prospects) || prospects.length === 0) {
     return (
@@ -59,81 +66,69 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
       </div>
     );
   }
-
-  const headers = Object.keys(prospects[0] || {});
-  const dataRows = prospects.slice(1);
   
-  const totalPages = Math.ceil(dataRows.length / itemsPerPage);
+  const totalPages = Math.ceil(prospects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentRows = dataRows.slice(startIndex, endIndex);
+  const currentRows = prospects.slice(startIndex, endIndex);
 
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
     setCurrentPage(1);
   };
 
-
   return (
     <div className="w-full rounded-lg border border-stone-200 shadow-sm bg-white dark:bg-stone-900 dark:border-stone-800">
       <div className="overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader className="bg-transparent"><TableRow className="border-b-stone-200 dark:border-b-stone-800 hover:bg-transparent">
-              {headers.map((header, index) => (
-                <TableHead key={index} className="h-12 px-4 text-left align-middle font-medium text-stone-500 uppercase text-xs tracking-wider dark:text-stone-400">
-                  {header}
-                </TableHead>
-              ))}
-              <TableHead className="relative px-4">
-                <span className="sr-only">Actions</span>
+            {headers.map((header) => (
+              <TableHead key={header} className="h-12 px-4 text-left align-middle font-medium text-stone-500 uppercase text-xs tracking-wider dark:text-stone-400 capitalize">
+                {header}
               </TableHead>
-            </TableRow></TableHeader>
+            ))}
+            <TableHead className="relative px-4">
+              <span className="sr-only">Actions</span>
+            </TableHead>
+          </TableRow></TableHeader>
           <TableBody>
-            {currentRows.map((row, idx) => {
+            {currentRows.map((row) => {
               if (!row || typeof row !== 'object') return null;
 
               return (
-                <TableRow key={idx} className="hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-150 border-b-stone-200 dark:border-b-stone-800">
-                  {headers.map((header, cellIdx) => {
+                <TableRow key={row.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors duration-150 border-b-stone-200 dark:border-b-stone-800">
+                  {headers.map((header) => {
                     const cell = row[header];
                     const cellClasses = "p-4 align-top break-words whitespace-normal max-w-xs";
 
-                    if (header.toLowerCase().replace(/_/g, '') === 'envoimessage') {
-                      const hasValue = cell && cell.toString().trim() !== '';
-                      return (
-                        <TableCell key={cellIdx} className={cellClasses}>
-                          {hasValue ? (
-                            <div className="flex items-center gap-2 text-green-600 dark:text-green-500">
-                              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                              <span className="font-medium text-xs">Done</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                              <Clock className="w-4 h-4 flex-shrink-0" />
-                              <span className="font-medium text-xs">En attente</span>
-                            </div>
-                          )}
-                        </TableCell>
-                      );
-                    }
                     if (header.toLowerCase() === 'status') {
                       return (
-                        <TableCell key={cellIdx} className={cellClasses}>
+                        <TableCell key={header} className={cellClasses}>
                           <Badge variant={getStatusVariant(cell)} className="capitalize text-xs font-semibold">
                             {cell || 'N/A'}
                           </Badge>
                         </TableCell>
                       );
                     }
+                    if (header.toLowerCase() === 'link') {
+                      return (
+                        <TableCell key={header} className={cellClasses}>
+                          <a href={cell} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400">
+                            <LinkIcon className="w-4 h-4 flex-shrink-0" />
+                            <span>Voir le profil</span>
+                          </a>
+                        </TableCell>
+                      );
+                    }
                     if (header.toLowerCase() === 'name') {
                       return (
-                        <TableCell key={cellIdx} className={`${cellClasses} font-medium text-stone-900 dark:text-stone-100`}>
+                        <TableCell key={header} className={`${cellClasses} font-medium text-stone-900 dark:text-stone-100`}>
                           {cell}
                         </TableCell>
                       );
                     }
                     return (
-                      <TableCell key={cellIdx} className={`${cellClasses} text-stone-600 dark:text-stone-300`}>
+                      <TableCell key={header} className={`${cellClasses} text-stone-600 dark:text-stone-300`}>
                         {cell}
                       </TableCell>
                     );
@@ -148,7 +143,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => alert(`Voir le profil de ${row.name}`)}>
+                        <DropdownMenuItem onClick={() => window.open(row.link, '_blank')}>
                           Voir le profil
                         </DropdownMenuItem>
                         <DropdownMenuItem>Modifier le statut</DropdownMenuItem>
@@ -207,7 +202,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages || dataRows.length === 0}
+            disabled={currentPage === totalPages || prospects.length === 0}
           >
             Suivant
           </Button>
@@ -216,7 +211,7 @@ export function CampaignStatusTable({ prospects }: { prospects: any[] }) {
             size="icon"
             className="h-9 w-9"
             onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages || dataRows.length === 0}
+            disabled={currentPage === totalPages || prospects.length === 0}
           >
             <ChevronsRight className="h-4 w-4" />
             <span className="sr-only">Dernière page</span>

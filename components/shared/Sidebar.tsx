@@ -92,7 +92,7 @@ export function Sidebar({ isCollapsed }: { isCollapsed: boolean }) {
                 isCollapsed ? 'opacity-0' : 'opacity-100'
               )}
             >
-              ProstIx Agent
+              Prospect Agent
             </span>
           </Link>
         </div>
@@ -112,7 +112,7 @@ export function Sidebar({ isCollapsed }: { isCollapsed: boolean }) {
                   <Button variant="ghost" className="w-full justify-start h-auto p-2">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
-                        <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                        {/*<AvatarImage src="/avatars/01.png" alt="Avatar" />*/}
                         <AvatarFallback>U</AvatarFallback>
                       </Avatar>
                       <div className={cn("overflow-hidden transition-opacity duration-200", isCollapsed ? "opacity-0" : "opacity-100")}>

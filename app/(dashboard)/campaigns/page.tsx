@@ -15,6 +15,35 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { CampaignTableSkeleton } from '@/components/dashboard/campaigns/CampaignTableSkeleton';
 
+// Helper pour mapper les IDs de colonnes Monday à des noms de champs simples
+// CORRECTION : Utiliser les noms de champs attendus par le tableau (en anglais)
+const MONDAY_COLUMN_MAPPING: { [key: string]: string } = {
+  'text_mkw9jnfn': 'name',          // La colonne "Nom" du prospect
+  'text_mkw966ha': 'title',         // "titre" devient "title"
+  'text_mkw95m5j': 'link',          // "liens" devient "link"
+  'text_mkw9kysm': 'description',
+  'color_mkw9cw95': 'status',        // "statut" devient "status"
+};
+
+// Fonction pour transformer un item Monday en un objet prospect simple
+const transformMondayItem = (item: any) => {
+  const prospect: { [key: string]: any } = {
+    id: item.id,
+    // On peut utiliser le nom de l'item comme fallback si la colonne nom est vide
+    name: item.name, 
+  };
+
+  item.column_values.forEach((col: any) => {
+    const fieldName = MONDAY_COLUMN_MAPPING[col.id];
+    if (fieldName && col.text) { // On vérifie que le texte n'est pas vide
+      prospect[fieldName] = col.text;
+    }
+  });
+
+  return prospect;
+};
+
+
 export default function CampaignsPage() {
   const [prospects, setProspects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +52,7 @@ export default function CampaignsPage() {
 
   const uniqueStatuses = useMemo(() => {
     if (prospects.length === 0) return [];
-    const statuses = prospects.map(p => p.status).filter(Boolean); // Filtre les valeurs vides/null
+    const statuses = prospects.map(p => p.status).filter(Boolean);
     return ['all', ...Array.from(new Set(statuses))];
   }, [prospects]);
 
@@ -31,17 +60,22 @@ export default function CampaignsPage() {
     const fetchProspects = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/sheets/1oavCo85kTfYGMeqQZYGK6-8JGTXeiE0n5OE-Gt0y4xU');
+        const response = await fetch('/api/monday');
+        const mondayResponse = await response.json();
+
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erreur lors de la récupération des données');
+          throw new Error(mondayResponse.error || 'Erreur lors de la récupération des données de Monday.com');
         }
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setProspects(data);
+        
+        const items = mondayResponse?.data?.boards?.[0]?.items_page?.items;
+        if (Array.isArray(items)) {
+          const transformedProspects = items.map(transformMondayItem);
+          setProspects(transformedProspects);
         } else {
-          throw new Error('Le format des données est incorrect.');
+          console.error("Réponse brute de l'API:", JSON.stringify(mondayResponse, null, 2));
+          throw new Error('Le format des données de Monday.com est incorrect. Vérifiez la console.');
         }
+
       } catch (error: any) {
         toast.error(error.message || 'Impossible de charger les prospects.');
       } finally {
@@ -54,22 +88,15 @@ export default function CampaignsPage() {
 
   const filteredProspects = useMemo(() => {
     return prospects.filter(prospect => {
-      // Sécurité pour ignorer les lignes vides ou invalides
       if (!prospect) return false;
-
       const searchLower = searchQuery.toLowerCase();
-
-      // Conversion explicite en chaîne de caractères pour éviter les erreurs
       const nameString = String(prospect.name || '');
       const titleString = String(prospect.title || '');
-
       const matchesSearch = 
         nameString.toLowerCase().includes(searchLower) ||
         titleString.toLowerCase().includes(searchLower);
-      
       const matchesStatus = 
-        statusFilter === 'all' || prospect.status === statusFilter;
-
+        statusFilter === 'all' || !prospect.status || prospect.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [prospects, searchQuery, statusFilter]);
@@ -81,12 +108,11 @@ export default function CampaignsPage() {
           <BarChart3 className="w-7 h-7" />
         </span>
         <div>
-          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight dark:text-stone-200">Statut des Campagnes</h1>
-          <p className="text-sm text-stone-500 mt-1 dark:text-stone-400">Recherchez, filtrez et suivez le statut de vos prospects.</p>
+          <h1 className="text-3xl font-extrabold text-stone-800 tracking-tight leading-tight dark:text-stone-200">Statut des Campagnes (Monday.com)</h1>
+          <p className="text-sm text-stone-500 mt-1 dark:text-stone-400">Recherchez, filtrez et suivez le statut de vos prospects depuis Monday.com.</p>
         </div>
       </div>
 
-      {/* Barre de recherche et filtres */}
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
