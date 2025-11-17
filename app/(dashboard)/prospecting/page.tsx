@@ -53,7 +53,8 @@ export default function ProspectingPage() {
     setSearchResults([]);
 
     try {
-      const response = await fetch('https://prontix.app.n8n.cloud/webhook-test/a2a1553a-ac8a-4b6a-a23a-45a752252a9d', {
+      // const response = await fetch('https://prontix.app.n8n.cloud/webhook-test/a2a1553a-ac8a-4b6a-a23a-45a752252a9d', {
+      const response = await fetch('https://n8n.pront-ix.com/webhook/b38ebc3e-0ce5-49fb-ae54-6b661e778163', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
