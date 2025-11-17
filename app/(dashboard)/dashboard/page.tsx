@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, MessageCircleReply, Percent, BarChart3 } from 'lucide-react';
+// MODIFICATION : Ajout de l'icône "Target" pour la prise de contact
+import { Users, Percent, BarChart3, Target } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { toast } from 'sonner';
 
@@ -54,7 +55,8 @@ const getColor = (status: string) => {
 // --- Fin des modifications pour Monday.com ---
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({ total: 0, responded: 0, responseRate: 0 });
+  // MODIFICATION : Mise à jour de la structure de l'état des statistiques
+  const [stats, setStats] = useState({ total: 0, contacted: 0, contactRate: 0 });
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -62,7 +64,6 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // 1. Appeler l'API Monday
         const response = await fetch('/api/monday');
         if (!response.ok) throw new Error('Failed to fetch prospects data from Monday.com');
         
@@ -70,16 +71,16 @@ export default function DashboardPage() {
         const items = mondayResponse?.data?.boards?.[0]?.items_page?.items;
         if (!Array.isArray(items)) throw new Error('Invalid data format from Monday.com');
 
-        // 2. Transformer les données
         const prospects = items.map(transformMondayItem);
 
-        // 3. Calculer les statistiques avec les nouvelles données
+        // MODIFICATION : Mise à jour de la logique de calcul
         const total = prospects.length;
-        const responded = prospects.filter(p => p.status?.toLowerCase().includes('répondu') || p.status?.toLowerCase().includes('intéressé')).length;
-        const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
-        setStats({ total, responded, responseRate });
+        // Compte le nombre de prospects avec le statut "Prise de contact"
+        const contacted = prospects.filter(p => p.status?.toLowerCase().includes('prise de contact')).length;
+        const contactRate = total > 0 ? Math.round((contacted / total) * 100) : 0;
+        setStats({ total, contacted, contactRate });
 
-        // 4. Préparer les données pour le graphique
+        // Préparer les données pour le graphique (inchangé)
         const statusCounts = prospects.reduce((acc, p) => {
           const status = p.status || 'Non défini';
           acc[status] = (acc[status] || 0) + 1;
@@ -123,22 +124,24 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
+        {/* MODIFICATION : Carte "Prise de contact" */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Réponses</CardTitle>
-            <MessageCircleReply className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Prise de contact</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.responded}</div>
+            <div className="text-2xl font-bold">{stats.contacted}</div>
           </CardContent>
         </Card>
+        {/* MODIFICATION : Carte "Taux de Prise de contact" */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taux de Réponse</CardTitle>
+            <CardTitle className="text-sm font-medium">Taux de Prise de contact</CardTitle>
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.responseRate}%</div>
+            <div className="text-2xl font-bold">{stats.contactRate}%</div>
           </CardContent>
         </Card>
       </div>
