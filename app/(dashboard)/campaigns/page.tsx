@@ -54,10 +54,18 @@ export default function CampaignsPage() {
 
   const filteredProspects = useMemo(() => {
     return prospects.filter(prospect => {
+      // Sécurité pour ignorer les lignes vides ou invalides
+      if (!prospect) return false;
+
       const searchLower = searchQuery.toLowerCase();
+
+      // Conversion explicite en chaîne de caractères pour éviter les erreurs
+      const nameString = String(prospect.name || '');
+      const titleString = String(prospect.title || '');
+
       const matchesSearch = 
-        prospect.name?.toLowerCase().includes(searchLower) ||
-        prospect.title?.toLowerCase().includes(searchLower);
+        nameString.toLowerCase().includes(searchLower) ||
+        titleString.toLowerCase().includes(searchLower);
       
       const matchesStatus = 
         statusFilter === 'all' || prospect.status === statusFilter;
