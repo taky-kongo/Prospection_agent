@@ -2,32 +2,61 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, MessageCircleReply, Percent, BarChart3 } from 'lucide-react';
+// MODIFICATION : Ajout de l'icône "Target" pour la prise de contact
+import { Users, Percent, BarChart3, Target } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { toast } from 'sonner';
 
-// Couleurs pour le graphique
-const COLORS = {
-  'Répondu': '#10B981', // Vert
-  'Non intéressé': '#EF4444', // Rouge
-  'Connecté': '#3B82F6', // Bleu
-  'Message envoyé': '#6366F1', // Indigo
-  'En attente': '#F59E0B', // Ambre
-  'Autre': '#6B7280', // Gris
+// --- Début des modifications pour Monday.com ---
+
+// Helper pour mapper les IDs de colonnes Monday à des noms de champs simples
+const MONDAY_COLUMN_MAPPING: { [key: string]: string } = {
+  'text_mkw9jnfn': 'name',
+  'text_mkw966ha': 'title',
+  'text_mkw95m5j': 'link',
+  'text_mkw9kysm': 'description',
+  'color_mkw9cw95': 'status',
+};
+
+// Fonction pour transformer un item Monday en un objet prospect simple
+const transformMondayItem = (item: any) => {
+  const prospect: { [key: string]: any } = { id: item.id, name: item.name };
+  item.column_values.forEach((col: any) => {
+    const fieldName = MONDAY_COLUMN_MAPPING[col.id];
+    if (fieldName && col.text) {
+      prospect[fieldName] = col.text;
+    }
+  });
+  return prospect;
+};
+
+// Couleurs pour le graphique (vous pouvez les ajuster)
+const COLORS: { [key: string]: string } = {
+  'Répondu': '#10B981',
+  'Intéressé': '#10B981', // Même couleur que répondu
+  'Non intéressé': '#EF4444',
+  'Connecté': '#3B82F6',
+  'Message envoyé': '#6366F1',
+  'Prise de contact': '#F59E0B',
+  'prospect trouvé': '#A855F7', // Violet
+  'Autre': '#6B7280',
 };
 
 // Fonction pour obtenir la couleur correspondante
 const getColor = (status: string) => {
-  const lowerStatus = status.toLowerCase();
-  if (lowerStatus.includes('répondu')) return COLORS['Répondu'];
-  if (lowerStatus.includes('non intéressé')) return COLORS['Non intéressé'];
-  if (lowerStatus.includes('connecté')) return COLORS['Connecté'];
-  if (lowerStatus.includes('message envoyé')) return COLORS['Message envoyé'];
+  for (const key in COLORS) {
+    if (status.toLowerCase().includes(key.toLowerCase())) {
+      return COLORS[key as keyof typeof COLORS];
+    }
+  }
   return COLORS['Autre'];
 };
 
+// --- Fin des modifications pour Monday.com ---
+
 export default function DashboardPage() {
-  const [stats, setStats] = useState({ total: 0, responded: 0, responseRate: 0 });
+  // MODIFICATION : Mise à jour de la structure de l'état des statistiques
+  const [stats, setStats] = useState({ total: 0, contacted: 0, contactRate: 0 });
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,24 +64,28 @@ export default function DashboardPage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/sheets/1oavCo85kTfYGMeqQZYGK6-8JGTXeiE0n5OE-Gt0y4xU');
-        if (!response.ok) throw new Error('Failed to fetch prospects data');
+        const response = await fetch('/api/monday');
+        if (!response.ok) throw new Error('Failed to fetch prospects data from Monday.com');
         
-        const prospects = await response.json();
-        if (!Array.isArray(prospects)) throw new Error('Invalid data format');
+        const mondayResponse = await response.json();
+        const items = mondayResponse?.data?.boards?.[0]?.items_page?.items;
+        if (!Array.isArray(items)) throw new Error('Invalid data format from Monday.com');
 
-        // Calcul des statistiques
+        const prospects = items.map(transformMondayItem);
+
+        // MODIFICATION : Mise à jour de la logique de calcul
         const total = prospects.length;
-        const responded = prospects.filter(p => p.status?.toLowerCase().includes('répondu')).length;
-        const responseRate = total > 0 ? Math.round((responded / total) * 100) : 0;
-        setStats({ total, responded, responseRate });
+        // Compte le nombre de prospects avec le statut "Prise de contact"
+        const contacted = prospects.filter(p => p.status?.toLowerCase().includes('prise de contact')).length;
+        const contactRate = total > 0 ? Math.round((contacted / total) * 100) : 0;
+        setStats({ total, contacted, contactRate });
 
-        // Préparation des données pour le graphique
+        // Préparer les données pour le graphique (inchangé)
         const statusCounts = prospects.reduce((acc, p) => {
-          const status = p.status || 'En attente de réponse';
+          const status = p.status || 'Non défini';
           acc[status] = (acc[status] || 0) + 1;
           return acc;
-        }, {});
+        }, {} as { [key: string]: number });
 
         const formattedChartData = Object.entries(statusCounts).map(([name, value]) => ({
           name,
@@ -91,22 +124,24 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
+        {/* MODIFICATION : Carte "Prise de contact" */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Réponses</CardTitle>
-            <MessageCircleReply className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Prise de contact</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.responded}</div>
+            <div className="text-2xl font-bold">{stats.contacted}</div>
           </CardContent>
         </Card>
+        {/* MODIFICATION : Carte "Taux de Prise de contact" */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taux de Réponse</CardTitle>
+            <CardTitle className="text-sm font-medium">Taux de Prise de contact</CardTitle>
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.responseRate}%</div>
+            <div className="text-2xl font-bold">{stats.contactRate}%</div>
           </CardContent>
         </Card>
       </div>
