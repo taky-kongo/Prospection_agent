@@ -1,91 +1,61 @@
-'use client';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Bot, Loader2, SearchCheck } from "lucide-react";
 
-import { LogEntry, generateFakeLog, Prospect as ProspectType } from '@/lib/fakeData';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
+interface RealTimeLogProps {
+  searchStarted: boolean;
+  isLoading: boolean;
+  results: any[];
+}
 
-
-
-// On rend les champs link et email optionnels pour la compatibilité
-type UnifiedProspect = ProspectType & { link?: string; email?: string };
-
-export function RealTimeLog({ searchStarted, searchResults, isLoading }: { searchStarted: boolean, searchResults: UnifiedProspect[], isLoading: boolean }) {
+export function RealTimeLog({ searchStarted, isLoading, results }: RealTimeLogProps) {
+  if (!searchStarted) {
+    return (
+      <div className="text-center text-stone-500 py-16 flex flex-col items-center gap-4 bg-stone-100/50 dark:bg-stone-900/50 rounded-lg border border-dashed dark:border-stone-800">
+        <SearchCheck className="w-12 h-12 text-stone-400" />
+        <h3 className="text-lg font-semibold dark:text-stone-300">En attente d'une recherche</h3>
+        <p className="text-sm dark:text-stone-500">Les résultats de votre prospection apparaîtront ici.</p>
+      </div>
+    );
+  }
 
   return (
-    <Card className="h-130 overflow-y-auto">
+    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur dark:bg-stone-900/80 dark:border-stone-800">
       <CardHeader>
-        <CardTitle className="text-lg">Profils correspondants</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-xl font-bold text-stone-800 dark:text-stone-200">
+          <Bot className="text-blue-600" />
+          Résultats de la Prospection
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 text-sm">
-        {!searchStarted && (
-          <p className="text-gray-500 italic text-center">
-            Lancez une recherche pour voir les résultats ici... 🔎
-          </p>
-        )}
-
-        {searchStarted && searchResults.length === 0 && (
-          <p className="text-gray-500 italic text-center">
-            Recherche en cours ou aucun résultat trouvé.
-          </p>
-        )}
-
-        {isLoading && searchResults.length === 0 ? (
-          <p className="text-gray-500 italic">Lancement de la recherche en cours...</p>
-        ) : (
-          searchResults.length > 0 && (
-            <div className="w-full overflow-x-auto">
-              <div className="min-w-[900px] max-w-screen-lg mx-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nom
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Profil
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status message
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {searchResults.map((prospect, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {prospect.name || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {prospect.title || 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {prospect.link ? (
-                            <a
-                              href={prospect.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              {prospect.link}
-                            </a>
-                          ) : (
-                            'N/A'
-                          )}
-                        </td>
-                        <td>
-
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+      <CardContent>
+        <ScrollArea className="h-72 w-full rounded-md border p-4 dark:border-stone-800">
+          {isLoading && results.length === 0 && (
+            <div className="flex items-center gap-3 text-stone-500 dark:text-stone-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Recherche en cours...</span>
             </div>
-          )
-        )}
+          )}
+          {results.length > 0 && (
+            <div className="space-y-4">
+              {results.map((item, index) => (
+                <div key={index}>
+                  <div className="text-sm">
+                    <p className="font-medium text-stone-800 dark:text-stone-200">{item.name}</p>
+                    <p className="text-stone-600 dark:text-stone-400">{item.title}</p>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs">
+                      Voir le profil
+                    </a>
+                  </div>
+                  {index < results.length - 1 && <Separator className="my-4 dark:bg-stone-800" />}
+                </div>
+              ))}
+            </div>
+          )}
+          {!isLoading && results.length === 0 && (
+            <p className="text-sm text-stone-500 dark:text-stone-400">Aucun résultat trouvé pour cette recherche.</p>
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

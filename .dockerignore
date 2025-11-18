@@ -1,0 +1,20 @@
+# Fichiers de configuration Docker
+Dockerfile
+.dockerignore
+
+# Dépendances locales
+node_modules
+
+# Dossier de build Next.js (sera généré dans le container)
+.next
+
+# Fichiers d'environnement (seront injectés au moment de l'exécution)
+.env
+.env.local
+
+# Fichiers Git
+.git
+.gitignore
+
+# Fichiers de documentation
+README.md
