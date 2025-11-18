@@ -53,7 +53,7 @@ export function RealTimeLog({ searchStarted, isLoading, results }: RealTimeLogPr
             </div>
           )}
           {!isLoading && results.length === 0 && (
-            <p className="text-sm text-stone-500 dark:text-stone-400">Aucun résultat trouvé pour cette recherche.</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400">Recherche effectuée</p>
           )}
         </ScrollArea>
       </CardContent>
